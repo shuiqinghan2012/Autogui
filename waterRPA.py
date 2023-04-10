@@ -84,7 +84,7 @@ def dataCheck(sheet1):
     return checkCmd
 
 #任务
-def mainWork(img):
+def mainWork(sheet1):
     i = 1
     while i < sheet1.nrows:
         #取本行指令的操作类型
