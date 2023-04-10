@@ -7,15 +7,28 @@ import pyperclip
 
 #pyautogui库其他用法 https://blog.csdn.net/qingfengxd1/article/details/108270159
 
-def mouseClick(clickTimes,lOrR,img,reTry):
+def mouseClick(clickTimes,lOrR,img,*argv):
+    reTry = argv[0]
     if reTry == 1:
+        if len(argv)>1:
+            timeout = argv[1]
+            timeFlag = True
+        else:
+            timeFlag = False
         while True:
             location=pyautogui.locateCenterOnScreen(img,confidence=0.9)
             if location is not None:
                 pyautogui.click(location.x,location.y,clicks=clickTimes,interval=0.2,duration=0.2,button=lOrR)
                 break
+            if timeFlag and timeout > 0:
+                timeout = timeout - 0.1
+                print(timeout)
+                if timeout < 0:
+                    print("设置时间超时推出！")
+                    break
             print("未找到匹配图片,0.1秒后重试")
             time.sleep(0.1)
+
     elif reTry == -1:
         while True:
             location=pyautogui.locateCenterOnScreen(img,confidence=0.9)
@@ -80,6 +93,14 @@ def dataCheck(sheet1):
             if cmdValue.ctype != 2:
                 print('第',i+1,"行,第2列数据有毛病")
                 checkCmd = False
+        # 第4列 内容检查
+        cmdValue = sheet1.row(i)[3]
+        # print(cmdValue.ctype)
+        # 读图点击类型，延迟数据必需为空0或者数字2
+        if cmdType.value ==1.0 or cmdType.value == 2.0 or cmdType.value == 3.0:
+            if cmdValue.ctype != 0 and cmdValue.ctype != 2:
+                print('第',i+1,"行,第4列数据有毛病")
+                checkCmd = False
         i += 1
     return checkCmd
 
@@ -95,7 +116,9 @@ def mainWork(sheet1):
             reTry = 1
             if sheet1.row(i)[2].ctype == 2 and sheet1.row(i)[2].value != 0:
                 reTry = sheet1.row(i)[2].value
-            mouseClick(1,"left",img,reTry)
+            if sheet1.row(i)[3].ctype == 2 and sheet1.row(i)[3].value != 0:
+                timeOut = sheet1.row(i)[3].value
+            mouseClick(1,"left",img,reTry,timeOut)
             print("单击左键",img)
         #2代表双击左键
         elif cmdType.value == 2.0:
