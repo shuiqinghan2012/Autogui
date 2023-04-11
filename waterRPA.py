@@ -10,24 +10,28 @@ import pyperclip
 def mouseClick(clickTimes,lOrR,img,*argv):
     reTry = argv[0]
     if reTry == 1:
+        #增加超时机制，如超时参数不为0，则timeout --操作，否则就while 1操作
         if len(argv)>1:
             timeout = argv[1]
-            timeFlag = True
-        else:
-            timeFlag = False
-        while True:
-            location=pyautogui.locateCenterOnScreen(img,confidence=0.9)
-            if location is not None:
-                pyautogui.click(location.x,location.y,clicks=clickTimes,interval=0.2,duration=0.2,button=lOrR)
-                break
-            if timeFlag and timeout > 0:
+            while (timeout > 0):
+                location = pyautogui.locateCenterOnScreen(img, confidence=0.9)
+                if location is not None:
+                    pyautogui.click(location.x, location.y, clicks=clickTimes, interval=0.2, duration=0.2, button=lOrR)
+                    break
+                print("未找到匹配图片,0.1秒后重试")
                 timeout = timeout - 0.1
                 print(timeout)
                 if timeout < 0:
-                    print("设置时间超时推出！")
+                    print("设置时间超时退出！")
                     break
-            print("未找到匹配图片,0.1秒后重试")
-            time.sleep(0.1)
+        else:
+            while True:
+                location=pyautogui.locateCenterOnScreen(img,confidence=0.9)
+                if location is not None:
+                    pyautogui.click(location.x,location.y,clicks=clickTimes,interval=0.2,duration=0.2,button=lOrR)
+                    break
+                print("未找到匹配图片,0.1秒后重试")
+                time.sleep(0.1)
 
     elif reTry == -1:
         while True:
@@ -128,7 +132,7 @@ def mainWork(sheet1):
             reTry = 1
             if sheet1.row(i)[2].ctype == 2 and sheet1.row(i)[2].value != 0:
                 reTry = sheet1.row(i)[2].value
-            mouseClick(2,"left",img,reTry)
+            mouseClick(2,"left",img,reTry,timeOut)
             print("双击左键",img)
         #3代表右键
         elif cmdType.value == 3.0:
@@ -138,7 +142,7 @@ def mainWork(sheet1):
             reTry = 1
             if sheet1.row(i)[2].ctype == 2 and sheet1.row(i)[2].value != 0:
                 reTry = sheet1.row(i)[2].value
-            mouseClick(1,"right",img,reTry)
+            mouseClick(1,"right",img,reTry,timeOut)
             print("右键",img) 
         #4代表输入
         elif cmdType.value == 4.0:
@@ -162,12 +166,14 @@ def mainWork(sheet1):
         i += 1
 
 if __name__ == '__main__':
-    file = 'cmd.xls'
+    file = 'cmd_timeout.xls'
+    print('配置文件为:',file)
     #打开文件
     wb = xlrd.open_workbook(filename=file)
     #通过索引获取表格sheet页
     sheet1 = wb.sheet_by_index(0)
-    print('欢迎使用不高兴就喝水牌RPA~')
+    # print('欢迎使用不高兴就喝水牌RPA~')
+    print('此版本具有鼠标按键超时功能~，配置文件使用cmd_timeout.xls')
     #数据检查
     checkCmd = dataCheck(sheet1)
     if checkCmd:
