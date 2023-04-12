@@ -107,6 +107,19 @@ def dataCheck(sheet1):
                 checkCmd = False
         i += 1
     return checkCmd
+#逐行读取文件内容，并返回一行内容的函数
+def readline(filename):
+    with open(filename, 'r',encoding='utf-8') as f:
+        if not hasattr(readline, 'lines'):
+            readline.lines = f.readlines()
+            readline.current = 0
+        while True:
+            if readline.current == len(readline.lines):
+                readline.current = 0
+            line = readline.lines[readline.current].strip()
+            readline.current += 1
+            if line:
+                return line
 
 #任务
 def mainWork(sheet1):
@@ -146,7 +159,12 @@ def mainWork(sheet1):
             print("右键",img) 
         #4代表输入
         elif cmdType.value == 4.0:
-            inputValue = sheet1.row(i)[1].value
+            # inputValue = sheet1.row(i)[1].value
+            if ".txt" in sheet1.row(i)[1].value:
+                inputFileName = sheet1.row(i)[1].value
+                inputValue = readline(inputFileName)
+            else:
+                inputValue = sheet1.row(i)[1].value
             pyperclip.copy(inputValue)
             pyautogui.hotkey('ctrl','v')
             time.sleep(0.5)
@@ -164,8 +182,15 @@ def mainWork(sheet1):
             pyautogui.scroll(int(scroll))
             print("滚轮滑动",int(scroll),"距离")                      
         i += 1
+s = """使用说明：需配置的文件为：
+1.cmd_timeout.xls
+2.inputCMD.txt 需如从文件逐行读取则配置
+3.截图保存png文件并配置到cmd_timeout.xls
+"""
 
 if __name__ == '__main__':
+    inputFileName = "inputCMD.txt"
+    print('欢迎使用，如需从文件中逐行读取内容并作为输入，请将内容配置到inputCMD.txt中')
     file = 'cmd_timeout.xls'
     print('配置文件为:',file)
     #打开文件
@@ -174,6 +199,7 @@ if __name__ == '__main__':
     sheet1 = wb.sheet_by_index(0)
     # print('欢迎使用不高兴就喝水牌RPA~')
     print('此版本具有鼠标按键超时功能~，配置文件使用cmd_timeout.xls')
+    print(s)
     #数据检查
     checkCmd = dataCheck(sheet1)
     if checkCmd:
